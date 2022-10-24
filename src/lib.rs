@@ -1,44 +1,47 @@
-#![no_std] 
+#![no_std]
 #![feature(test)]
 extern crate test;
 
 use anyhow::{anyhow, Result};
 use num_bigint::BigUint;
-use wasmtime::*;
 use sp_std::vec::Vec;
+use wasmtime::*;
 
 const P_G1: i32 = 42104;
 const P_G2: i32 = 42392;
 struct WasmInstance {
     memory: Memory,
     instance: Instance,
-    store: Store<i32>,
+    store: Store<()>,
 }
 
 impl WasmInstance {
     fn from_file(path: &str) -> Result<Self, anyhow::Error> {
-        // First step is to create the Wasm execution engine with some config.
-        // In this example we are using the default configuration.
+        // An engine stores and configures global compilation settings like
+        // optimization level, enabled wasm features, etc.
         let engine = Engine::default();
-        let wasm = std::fs::read(path)
-            .map_err(|_| anyhow!("failed to read Wasm file"))
-            .unwrap();
-        let module = Module::new(&engine, &mut &wasm[..])?;
+        // We start off by creating a `Module` which represents a compiled form
+        // of our input wasm module. In this case it'll be JIT-compiled after
+        // we parse the text format.
+        let module = Module::from_file(&engine, path)?;
 
-        // All Wasm objects operate within the context of a `Store`.
-        // Each `Store` has a type parameter to store host-specific data,
-        // which in this case we are using `42` for.
-        type HostState = u32;
-        let mut store = Store::new(&engine, 42);
+        // A `Store` is what will own instances, functions, globals, etc. All wasm
+        // items are stored within a `Store`, and it's what we'll always be using to
+        // interact with the wasm world. Custom data can be stored in stores but for
+        // now we just use `()`.
+        let mut store = Store::new(&engine, ());
 
-        // In order to create Wasm module instances and link their imports
-        // and exports we require a `Linker`.
-        let mut linker = <Linker<HostState>>::new();
+        let memory = Memory::new(&mut store, MemoryType::new(30, None)).unwrap();
 
-        let memory = Memory::new(&mut store, MemoryType::new(30, None))
-            .map_err(|_| anyhow!("failed to define WASM memory"))?;
+        // For host-provided functions it's recommended to use a `Linker` which does
+        // name-based resolution of functions.
+        let mut linker = Linker::new(&engine);
+
         linker.define("env", "memory", memory)?;
-        let instance = linker.instantiate(&mut store, &module)?.start(&mut store)?;
+
+        // With a compiled `Module` we can then instantiate it, creating
+        // an `Instance` which we can actually poke at functions on.
+        let instance = linker.instantiate(&mut store, &module)?;
         Ok(Self {
             memory,
             instance,
