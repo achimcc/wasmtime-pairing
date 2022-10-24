@@ -2,7 +2,7 @@
 #![feature(test)]
 extern crate test;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use num_bigint::BigUint;
 use sp_std::vec::Vec;
 use wasmtime::*;
@@ -51,11 +51,7 @@ impl WasmInstance {
 
     fn from_montgomery(&mut self, from: i32, to: i32) {
         self.instance
-            .get_export(&self.store, "ftm_fromMontgomery")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"ftm_fromMontgomery\""))
-            .unwrap()
-            .typed::<(i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32), (), _>(&mut self.store, "ftm_fromMontgomery")
             .unwrap()
             .call(&mut self.store, (from, to))
             .unwrap();
@@ -63,11 +59,7 @@ impl WasmInstance {
 
     fn to_montgomery(&mut self, from: i32, to: i32) {
         self.instance
-            .get_export(&self.store, "ftm_toMontgomery")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"ftm_toMontgomery\""))
-            .unwrap()
-            .typed::<(i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32), (), _>(&mut self.store, "ftm_toMontgomery")
             .unwrap()
             .call(&mut self.store, (from, to))
             .unwrap();
@@ -75,11 +67,7 @@ impl WasmInstance {
 
     fn compute_pairing(&mut self, p_g1: i32, p_g2: i32, p_res: i32) {
         self.instance
-            .get_export(&self.store, "bls12381_pairing")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"bls12381_pairing\""))
-            .unwrap()
-            .typed::<(i32, i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32, i32), (), _>(&mut self.store, "bls12381_pairing")
             .unwrap()
             .call(&mut self.store, (p_g1, p_g2, p_res))
             .unwrap();
@@ -87,11 +75,7 @@ impl WasmInstance {
 
     fn g1m_neg(&mut self, from: i32, to: i32) {
         self.instance
-            .get_export(&self.store, "g1m_neg")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"g1m_neg\""))
-            .unwrap()
-            .typed::<(i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32), (), _>(&mut self.store, "g1m_neg")
             .unwrap()
             .call(&mut self.store, (from, to))
             .unwrap();
@@ -99,11 +83,7 @@ impl WasmInstance {
 
     fn ftm_conjugate(&mut self, from: i32, to: i32) {
         self.instance
-            .get_export(&self.store, "ftm_conjugate")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"ftm_conjugate\""))
-            .unwrap()
-            .typed::<(i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32), (), _>(&mut self.store, "ftm_conjugate")
             .unwrap()
             .call(&mut self.store, (from, to))
             .unwrap();
@@ -111,11 +91,7 @@ impl WasmInstance {
 
     fn g2m_neg(&mut self, from: i32, to: i32) {
         self.instance
-            .get_export(&self.store, "g2m_neg")
-            .and_then(Extern::into_func)
-            .ok_or_else(|| anyhow!("could not find function \"g2m_neg\""))
-            .unwrap()
-            .typed::<(i32, i32), ()>(&mut self.store)
+            .get_typed_func::<(i32, i32), (), _>(&mut self.store, "g2m_neg")
             .unwrap()
             .call(&mut self.store, (from, to))
             .unwrap();
