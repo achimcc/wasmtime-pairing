@@ -1,0 +1,16 @@
+[package]
+name = "wasmer-test"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+wasmtime = "2.0.0"
+anyhow = { version = "^1.0.0" }
+wat = "1"
+rand = "0.8"
+num-bigint = { version = "0.4", features = ["rand"] }
+getrandom = { version = "0.2", features = ["js"] }
+sp-std = { version = "4.0.0", default-features = false }
